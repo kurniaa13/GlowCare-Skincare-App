@@ -1,37 +1,106 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  Text,
+  StyleSheet,
+  Pressable,
+  Alert,
+  StatusBar,
+} from 'react-native';
+import { skincareData } from './types';
+import { HeaderBanner } from './components/HeaderBanner';
+import { ProductList } from './components/ProductList';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Halo! 👋</Text>
-      <Text style={styles.subtitle}>
-        Aplikasi saya sudah berhasil dijalankan.
-      </Text>
+  const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
 
-      <StatusBar style="auto" />
-    </View>
+  const getFilteredProducts = () => {
+    if (selectedCategory === 'Semua') return skincareData;
+    return skincareData.filter((item) => item.category === selectedCategory);
+  };
+
+  const handleAddToCart = (productName: string) => {
+    Alert.alert('Keranjang', `${productName} telah ditambahkan ke keranjang!`);
+  };
+
+  const categories = ['Semua', 'Serum', 'Moisturizer', 'Sunscreen', 'Cleanser'];
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF1F2" />
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <HeaderBanner />
+
+        <Text style={styles.filterTitle}>Pilih Kategori:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+          {categories.map((cat) => (
+            <Pressable
+              key={cat}
+              style={[
+                styles.categoryChip,
+                selectedCategory === cat && styles.categoryChipActive,
+              ]}
+              onPress={() => setSelectedCategory(cat)}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === cat && styles.categoryTextActive,
+                ]}
+              >
+                {cat}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        <ProductList
+          products={getFilteredProducts()}
+          onAddToCart={handleAddToCart}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    backgroundColor: '#FFF1F2',
   },
-
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  scrollContent: {
+    padding: 16,
   },
-
-  subtitle: {
-    fontSize: 16,
-    color: '#666666',
-    textAlign: 'center',
+  filterTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#9F1239',
+    marginBottom: 8,
+  },
+  filterScroll: {
+    marginBottom: 16,
+  },
+  categoryChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+  },
+  categoryChipActive: {
+    backgroundColor: '#BE123C',
+    borderColor: '#BE123C',
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9F1239',
+  },
+  categoryTextActive: {
+    color: '#FFFFFF',
   },
 });
