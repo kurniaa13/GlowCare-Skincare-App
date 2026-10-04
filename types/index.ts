@@ -1,7 +1,9 @@
+export type ProductCategory = 'Serum' | 'Moisturizer' | 'Sunscreen' | 'Cleanser';
+
 export interface SkincareProduct {
-  id: string;
+  readonly id: string;
   name: string;
-  category: 'Serum' | 'Moisturizer' | 'Sunscreen' | 'Cleanser';
+  category: ProductCategory;
   price: number;
   rating: number;
   image: string;
@@ -45,4 +47,4 @@ export const skincareData: SkincareProduct[] = [
     image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
     isReady: true,
   },
-];
+];
