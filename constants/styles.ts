@@ -1,99 +1,42 @@
 import { StyleSheet } from 'react-native';
 
-// EXTERNAL STYLING (Modul 1 - 3.2): style dipisah dari komponen supaya rapi & reusable
+// EXTERNAL STYLING (Modul 1 - 3.2): style layar utama dipisah dari file komponen
 export const styles = StyleSheet.create({
-  // ---- Layar utama ----
-  screen: {
+  container: {
     flex: 1,
     backgroundColor: '#FFF1F2',
   },
-  screenContent: {
-    paddingHorizontal: 20,
-    paddingTop: 56,
-    paddingBottom: 32,
+  scrollContent: {
+    padding: 16,
   },
-
-  // ---- Daftar produk ----
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#881337',
-    marginBottom: 12,
-  },
-
-  // ---- Kartu produk ----
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 14,
-    elevation: 4, // bayangan Android
-    shadowColor: '#000', // bayangan iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-  },
-  cardImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 12,
-    backgroundColor: '#FBCFE8',
-  },
-  cardBody: {
-    flex: 1,
-    marginLeft: 12,
-    justifyContent: 'space-between',
-  },
-  categoryBadge: {
-    alignSelf: 'flex-start',
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#BE123C',
-    backgroundColor: '#FCE7F3',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  productName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginTop: 4,
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  rating: {
+  filterTitle: {
     fontSize: 12,
-    color: '#64748b',
-    marginLeft: 4,
+    fontWeight: '700',
+    color: '#9F1239',
+    marginBottom: 8,
   },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
+  filterScroll: {
+    marginBottom: 16,
   },
-  price: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#881337',
-  },
-  buyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  categoryChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#FECDD3',
   },
-  buyButtonText: {
+  categoryChipActive: {
+    backgroundColor: '#BE123C',
+    borderColor: '#BE123C',
+  },
+  categoryText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginLeft: 4,
+    fontWeight: '600',
+    color: '#9F1239',
+  },
+  categoryTextActive: {
+    color: '#FFFFFF',
   },
 });

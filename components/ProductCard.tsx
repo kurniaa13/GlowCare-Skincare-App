@@ -1,63 +1,136 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, Image, Pressable, Text, View } from 'react-native';
-import { styles } from '../constants/styles';
-import type { SkincareProduct } from '../types';
+import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
+import { SkincareProduct } from '../types';
 
 interface ProductCardProps {
-  product: SkincareProduct;
+  item: SkincareProduct;
+  onAddToCart: (name: string) => void;
 }
 
-// Custom function: mengubah 129000 menjadi "Rp 129.000"
-const formatPrice = (price: number): string => {
-  return 'Rp ' + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-};
-
-export function ProductCard({ product }: ProductCardProps) {
-  // Function bawaan (Alert) dibungkus di function buatan sendiri
-  const handleBuy = () => {
-    Alert.alert('Berhasil!', `${product.name} masuk ke keranjang.`);
-  };
-
+export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart }) => {
   return (
     <View style={styles.card}>
-      <Image source={{ uri: product.image }} style={styles.cardImage} />
+      <Image source={{ uri: item.image }} style={styles.productImage} />
 
-      <View style={styles.cardBody}>
-        <View>
-          <Text style={styles.categoryBadge}>{product.category}</Text>
-          <Text style={styles.productName} numberOfLines={2}>
-            {product.name}
-          </Text>
-          <View style={styles.ratingRow}>
-            <Ionicons name="star" size={12} color="#F59E0B" />
-            <Text style={styles.rating}>{product.rating}</Text>
+      <View style={styles.details}>
+        <View style={styles.categoryRow}>
+          <Text style={styles.categoryText}>{item.category}</Text>
+          <View
+            style={[
+              styles.stockBadge,
+              { backgroundColor: item.isReady ? '#DCFCE7' : '#FEE2E2' },
+            ]}
+          >
+            <Text
+              style={[
+                styles.stockText,
+                { color: item.isReady ? '#15803D' : '#B91C1C' },
+              ]}
+            >
+              {item.isReady ? 'Ready' : 'Habis'}
+            </Text>
           </View>
         </View>
 
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>{formatPrice(product.price)}</Text>
+        <Text style={styles.productName} numberOfLines={2}>
+          {item.name}
+        </Text>
 
-          {/* INLINE STYLING (Modul 1 - 3.3): warna tombol bergantung pada nilai isReady */}
+        <Text style={styles.ratingText}>⭐ {item.rating} / 5.0</Text>
+
+        <View style={styles.bottomRow}>
+          <Text style={styles.priceText}>
+            Rp {item.price.toLocaleString('id-ID')}
+          </Text>
+
           <Pressable
-            onPress={handleBuy}
-            disabled={!product.isReady}
             style={[
               styles.buyButton,
-              { backgroundColor: product.isReady ? '#BE123C' : '#9CA3AF' },
+              { backgroundColor: item.isReady ? '#BE123C' : '#9CA3AF' },
             ]}
+            disabled={!item.isReady}
+            onPress={() => onAddToCart(item.name)}
           >
-            <Ionicons
-              name={product.isReady ? 'cart' : 'close-circle'}
-              size={14}
-              color="#ffffff"
-            />
-            <Text style={styles.buyButtonText}>
-              {product.isReady ? 'Beli' : 'Habis'}
-            </Text>
+            <Text style={styles.buyButtonText}>+ Beli</Text>
           </Pressable>
         </View>
       </View>
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  productImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 8,
+    backgroundColor: '#F9FAFB',
+  },
+  details: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: 'space-between',
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#9F1239',
+    textTransform: 'uppercase',
+  },
+  stockBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  stockText: {
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  productName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginTop: 2,
+  },
+  ratingText: {
+    fontSize: 11,
+    color: '#D97706',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  priceText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#881337',
+  },
+  buyButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  buyButtonText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+});
