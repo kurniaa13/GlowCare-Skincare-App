@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MAGMA-Mobile",
-    "slug": "MAGMA-Mobile",
+    "name": "GlowCare",
+    "slug": "GlowCare-Skincare-App",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
