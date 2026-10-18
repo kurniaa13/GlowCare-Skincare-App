@@ -1,7 +1,9 @@
+export type ProductCategory = 'Serum' | 'Moisturizer' | 'Sunscreen' | 'Cleanser';
+
 export interface SkincareProduct {
-  id: string;
+  readonly id: string;
   name: string;
-  category: 'Serum' | 'Moisturizer' | 'Sunscreen' | 'Cleanser';
+  category: ProductCategory;
   price: number;
   rating: number;
   image: string;

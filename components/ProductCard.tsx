@@ -5,11 +5,19 @@ import { SkincareProduct } from '../types';
 interface ProductCardProps {
   item: SkincareProduct;
   onAddToCart: (name: string) => void;
+  /** Opsional: dipanggil saat kartu ditekan (dipakai untuk membuka halaman detail). */
+  onPress?: (item: SkincareProduct) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart, onPress }) => {
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={styles.card}
+      onPress={onPress ? () => onPress(item) : undefined}
+      // Kartu tidak dijadikan satu elemen aksesibilitas, supaya tombol "+ Beli"
+      // di dalamnya tetap bisa dijangkau screen reader seperti sebelumnya.
+      accessible={false}
+    >
       <Image source={{ uri: item.image }} style={styles.productImage} />
 
       <View style={styles.details}>
@@ -55,7 +63,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart }) =
           </Pressable>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
