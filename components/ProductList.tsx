@@ -6,14 +6,25 @@ import { ProductCard } from './ProductCard';
 interface ProductListProps {
   products: SkincareProduct[];
   onAddToCart: (name: string) => void;
+  /** Opsional: dipanggil saat salah satu kartu produk ditekan. */
+  onProductPress?: (product: SkincareProduct) => void;
 }
 
-export const ProductList: React.FC<ProductListProps> = ({ products, onAddToCart }) => {
+export const ProductList: React.FC<ProductListProps> = ({
+  products,
+  onAddToCart,
+  onProductPress,
+}) => {
   return (
     <View>
       <Text style={styles.sectionTitle}>Katalog Produk Skincare</Text>
       {products.map((product) => (
-        <ProductCard key={product.id} item={product} onAddToCart={onAddToCart} />
+        <ProductCard
+          key={product.id}
+          item={product}
+          onAddToCart={onAddToCart}
+          onPress={onProductPress}
+        />
       ))}
     </View>
   );

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  Text,
-  StyleSheet,
-  Pressable,
-  Alert,
-  StatusBar,
-} from 'react-native';
-import { skincareData } from './types';
-import { HeaderBanner } from './components/HeaderBanner';
-import { ProductList } from './components/ProductList';
+import { ScrollView, Text, StyleSheet, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { HeaderBanner } from '@/components/HeaderBanner';
+import { ProductList } from '@/components/ProductList';
+import { skincareData, type ProductCategory, type SkincareProduct } from '@/types';
+import { showAddedToCartAlert } from '@/utils/cart';
 
-export default function App() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
+type CategoryFilter = ProductCategory | 'Semua';
+
+const categories: CategoryFilter[] = ['Semua', 'Serum', 'Moisturizer', 'Sunscreen', 'Cleanser'];
+
+export default function HomePage() {
+  const router = useRouter();
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('Semua');
 
   const getFilteredProducts = () => {
     if (selectedCategory === 'Semua') return skincareData;
@@ -21,15 +21,16 @@ export default function App() {
   };
 
   const handleAddToCart = (productName: string) => {
-    Alert.alert('Keranjang', `${productName} telah ditambahkan ke keranjang!`);
+    showAddedToCartAlert(productName);
   };
 
-  const categories = ['Semua', 'Serum', 'Moisturizer', 'Sunscreen', 'Cleanser'];
+  // push(): halaman detail ditumpuk di atas Home, jadi bisa kembali dengan back().
+  const handleProductPress = (product: SkincareProduct) => {
+    router.push({ pathname: '/product/[id]', params: { id: product.id } });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFF1F2" />
-
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <HeaderBanner />
 
@@ -59,6 +60,7 @@ export default function App() {
         <ProductList
           products={getFilteredProducts()}
           onAddToCart={handleAddToCart}
+          onProductPress={handleProductPress}
         />
       </ScrollView>
     </SafeAreaView>
