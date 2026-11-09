@@ -68,6 +68,20 @@ export const guides: Guide[] = [
     ],
     tip: 'Pakai sunscreen walaupun cuaca mendung atau sedang berada di dalam ruangan dekat jendela.',
   },
+   {
+    path: 'masker wajah sheethmask',
+    group: 'kategori',
+    title: 'Panduan menggunkan masker',
+    summary:
+      'Sunscreen melindungi kulit dari sinar UV dan merupakan langkah terakhir skincare di pagi hari.',
+    steps: [
+      'cuci wajah sampai bersih.',
+      'gunakan pada wajah dan tuang sia serum pada leher.',
+      'tunggu 15 menit lalu angkat.',
+      'tunggu hingga meresap dan bisa beraktivitas seperti biasa.',
+    ],
+    tip: 'Pakai sunscreen walaupun cuaca mendung atau sedang berada di dalam ruangan dekat jendela.',
+  },
   {
     path: 'cleanser',
     group: 'kategori',
@@ -103,6 +117,19 @@ export const guides: Guide[] = [
       'Cleanser (dua kali jika memakai sunscreen atau makeup)',
       'Serum',
       'Moisturizer',
+    ],
+  },
+  {
+    path: 'rutinitas/malam',
+    group: 'rutinitas',
+    title: 'Rutinitas Malam',
+    summary: 'Perawatan malam hari berfokus pada pembersihan menyeluruh untuk mengangkat kotoran serta hidrasi ekstra agar regenerasi kulit maksimal saat tidur.',
+    steps: [
+      'First Cleanser (Micellar Water / Cleansing Oil)',
+      'Second Cleanser (Facial Wash)',
+      'Toner Eksfoliasi / Hidrasi',
+      'Serum Nutrisi',
+      'Moisturizer / Night Cream',
     ],
   },
 ];

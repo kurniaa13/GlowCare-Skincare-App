@@ -14,7 +14,7 @@ export const HeaderBanner: React.FC = () => {
       <View style={styles.bannerCard}>
         <Text style={styles.bannerTag}>PROMO SPESIAL</Text>
         <Text style={styles.bannerTitle}>Diskon Hingga 30%</Text>
-        <Text style={styles.bannerDesc}>Khusus pembelian produk Glowing Serum hari ini!</Text>
+        <Text style={styles.bannerDesc}>Klo mau glowing jangan lupa beli skincare yach!</Text>
       </View>
     </View>
   );
