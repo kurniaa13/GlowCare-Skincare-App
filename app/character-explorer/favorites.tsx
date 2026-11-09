@@ -1,119 +1,61 @@
-
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { ScrollView, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
+import CharacterCard from '@/components/CharacterCard';
+import { getFavorites, removeFavorite } from '@/services/favoriteService';
+import type { Character } from '@/types/character';
+import { Loading } from '@/components/Loading';
+import { pageStyles } from '@/styles';
 
-import type { Character } from '../../types/character';
-import CharacterCard from '../../components/CharacterCard';
-import {
-  getFavorites,
-  removeFavorite,
-} from '../../services/favoriteService';
-
-export default function FavoritesScreen() {
+// Rute: /character-explorer/favorites
+export default function FavoriteCharactersPage() {
   const router = useRouter();
-
   const [favorites, setFavorites] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const loadFavorites = async () => {
-    try {
-      setLoading(true);
-      const data = await getFavorites();
-      setFavorites(data);
-    } catch {
-      Alert.alert('Error', 'Gagal memuat karakter favorit.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = useState<boolean>(true);
 
   useFocusEffect(
     useCallback(() => {
-      loadFavorites();
+      getFavorites()
+        .then((list) => setFavorites(list))
+        .finally(() => setLoading(false));
     }, [])
   );
 
-  const handleRemoveFavorite = async (character: Character) => {
-    try {
-      await removeFavorite(character.mal_id);
-
-      setFavorites((prev) =>
-        prev.filter((item) => item.mal_id !== character.mal_id)
-      );
-    } catch {
-      Alert.alert('Error', 'Gagal menghapus karakter dari favorit.');
-    }
+  const handleRemove = async (character: Character) => {
+    await removeFavorite(character.mal_id);
+    setFavorites((currentFavorites) =>
+      currentFavorites.filter((item) => item.mal_id !== character.mal_id)
+    );
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#D66A91" />
-        <Text>Memuat karakter favorit...</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Karakter Favorit ❤️</Text>
+    <SafeAreaView style={pageStyles.container} edges={['bottom', 'left', 'right']}>
+      <ScrollView contentContainerStyle={pageStyles.content}>
+        <Text style={pageStyles.title}>Karakter Favorit</Text>
+        <Text style={pageStyles.subtitle}>Tersimpan di perangkat (AsyncStorage)</Text>
 
-      <FlatList
-        data={favorites}
-        keyExtractor={(item) => item.mal_id.toString()}
-        renderItem={({ item }) => (
-          <CharacterCard
-            character={item}
-            isFavorite={true}
-            onPress={() =>
-              router.push(
-                `/character-explorer/character/${item.mal_id}`
-              )
-            }
-            onToggleFavorite={() => handleRemoveFavorite(item)}
-          />
+        {loading ? (
+          <Loading message="Memuat favorit..." />
+        ) : favorites.length === 0 ? (
+          <Text style={[pageStyles.mutedText, { marginTop: 20 }]}>Belum ada karakter favorit.</Text>
+        ) : (
+          <>
+            <Text style={pageStyles.sectionTitle}>{favorites.length} karakter</Text>
+            {favorites.map((character) => (
+              <CharacterCard
+                key={character.mal_id}
+                character={character}
+                isFavorite
+                onToggleFavorite={() => handleRemove(character)}
+                onPress={() =>
+                  router.push({ pathname: '/character-explorer/character/[id]', params: { id: String(character.mal_id) } })
+                }
+              />
+            ))}
+          </>
         )}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            Belum ada karakter favorit.
-          </Text>
-        }
-        onRefresh={loadFavorites}
-        refreshing={loading}
-      />
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF8FA',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333333',
-    margin: 16,
-  },
-  empty: {
-    textAlign: 'center',
-    marginTop: 40,
-    color: '#777777',
-    fontSize: 14,
-  },
-});
