@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 12,
-    color: '#9F1239',
+    color: 'rgb(52, 38, 42)',
     marginTop: 2,
   },
   bannerCard: {
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#FBCFE8',
+    borderColor: 'rgb(249, 199, 227)',
   },
   bannerTag: {
     fontSize: 10,
