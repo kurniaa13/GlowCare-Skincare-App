@@ -8,6 +8,9 @@ export interface SkincareProduct {
   rating: number;
   image: string;
   isReady: boolean;
+  // Modul 3: diisi dari External API (opsional, data statis Modul 1-2 tidak punya)
+  stock?: number;
+  discountPercentage?: number;
 }
 
 export const skincareData: SkincareProduct[] = [
