@@ -14,7 +14,7 @@ export const HeaderBanner: React.FC = () => {
       <View style={styles.bannerCard}>
         <Text style={styles.bannerTag}>PROMO SPESIAL</Text>
         <Text style={styles.bannerTitle}>Diskon Hingga 30%</Text>
-        <Text style={styles.bannerDesc}>Khusus pembelian produk Glowing Serum hari ini!</Text>
+        <Text style={styles.bannerDesc}>Klo mau glowing jangan lupa beli skincare yach!</Text>
       </View>
     </View>
   );
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 12,
-    color: 'rgb(52, 38, 42)',
+    color: '#9F1239',
     marginTop: 2,
   },
   bannerCard: {
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgb(249, 199, 227)',
+    borderColor: '#FBCFE8',
   },
   bannerTag: {
     fontSize: 10,
