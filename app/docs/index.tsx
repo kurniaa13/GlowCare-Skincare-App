@@ -48,6 +48,13 @@ export default function DocsIndexPage() {
           onPress={() => router.push('/codelab-1')}
         />
 
+        <Text style={pageStyles.sectionTitle}>Latihan Modul 3</Text>
+        <PageButton
+          title="Codelab 1 - Character Explorer (API Call)"
+          variant="outline"
+          onPress={() => router.push('/character-explorer')}
+        />
+
         {/* Contoh inline style (Modul 2): style ditulis langsung di komponen */}
         <Text style={{ textAlign: 'center', color: '#999999', marginTop: 10 }}>
           GlowCare Skincare Guide
