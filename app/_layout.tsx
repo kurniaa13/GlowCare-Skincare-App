@@ -14,6 +14,8 @@ export default function RootLayout() {
         {/* docs punya Stack sendiri (nested Stack, lihat app/docs/_layout.tsx) */}
         <Stack.Screen name="docs" options={{ title: 'Panduan Skincare', headerShown: false }} />
         <Stack.Screen name="codelab-1" options={{ title: 'Codelab 1 - useContext' }} />
+        {/* Modul 3: Codelab Character Explorer (nested Stack sendiri) */}
+        <Stack.Screen name="character-explorer" options={{ title: 'Character Explorer', headerShown: false }} />
       </Stack>
     </>
   );
