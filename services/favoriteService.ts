@@ -1,49 +1,31 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Character } from '../types/character';
+import type { Character } from '@/types/character';
 
-const FAVORITE_KEY = '@character_favorites';
+// Akan dibahas lebih lanjut di Modul 4 (local storage).
+// Yang disimpan satu objek Character utuh supaya halaman favorit tidak perlu memanggil API lagi.
+const FAVORITES_KEY = 'character-explorer:favorites';
 
-export const getFavorites = async (): Promise<Character[]> => {
+export async function getFavorites(): Promise<Character[]> {
   try {
-    const data = await AsyncStorage.getItem(FAVORITE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    return Promise.reject(error);
+    const raw = await AsyncStorage.getItem(FAVORITES_KEY);
+    return raw ? (JSON.parse(raw) as Character[]) : [];
+  } catch {
+    return [];
   }
-};
+}
 
-export const addFavorite = async (
-  character: Character
-): Promise<void> => {
+export async function isFavorite(id: number): Promise<boolean> {
   const favorites = await getFavorites();
+  return favorites.some((c) => c.mal_id === id);
+}
 
-  const exists = favorites.some(
-    (item) => item.mal_id === character.mal_id
-  );
-
-  if (!exists) {
-    favorites.push(character);
-    await AsyncStorage.setItem(
-      FAVORITE_KEY,
-      JSON.stringify(favorites)
-    );
-  }
-};
-
-export const removeFavorite = async (id: number): Promise<void> => {
+// Tambah/hapus karakter dari favorit, lalu kembalikan daftar terbaru.
+export async function toggleFavorite(character: Character): Promise<Character[]> {
   const favorites = await getFavorites();
-
-  const updated = favorites.filter(
-    (item) => item.mal_id !== id
-  );
-
-  await AsyncStorage.setItem(
-    FAVORITE_KEY,
-    JSON.stringify(updated)
-  );
-};
-
-export const isFavorite = async (id: number): Promise<boolean> => {
-  const favorites = await getFavorites();
-  return favorites.some((item) => item.mal_id === id);
-};
+  const exists = favorites.some((c) => c.mal_id === character.mal_id);
+  const updated = exists
+    ? favorites.filter((c) => c.mal_id !== character.mal_id)
+    : [...favorites, character];
+  await AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+  return updated;
+}

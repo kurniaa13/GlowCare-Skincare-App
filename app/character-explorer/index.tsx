@@ -1,160 +1,82 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { CharacterCard } from '@/components/CharacterCard';
+import { getTopCharacters } from '@/services/characterService';
+import type { Character } from '@/types/character';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { Loading } from '@/components/Loading';
+import { PageButton } from '@/components/PageButton';
+import { pageStyles } from '@/styles';
 
-import type { Character } from '../../types/character';
-import CharacterCard from '../../components/CharacterCard';
-import { getTopCharacters } from '../../services/characterService';
-import {
-  addFavorite,
-  removeFavorite,
-  getFavorites,
-} from '../../services/favoriteService';
-
-export default function CharacterExplorer() {
+// Rute: /character-explorer (landing page Codelab-1 Modul 3)
+export default function AnimeHunterHome() {
   const router = useRouter();
-
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadCharacters = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-
-      const [data, favorites] = await Promise.all([
-        getTopCharacters(),
-        getFavorites(),
-      ]);
-
+      setError(null);
+      const data = await getTopCharacters();
       setCharacters(data);
-      setFavoriteIds(favorites.map((item) => item.mal_id));
-    } catch (error) {
-      Alert.alert('Error', 'Gagal mengambil data karakter.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Terjadi kesalahan.');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadCharacters();
   }, []);
 
-  const toggleFavorite = async (character: Character) => {
-    try {
-      const exists = favoriteIds.includes(character.mal_id);
-
-      if (exists) {
-        await removeFavorite(character.mal_id);
-        setFavoriteIds((prev) =>
-          prev.filter((id) => id !== character.mal_id)
-        );
-      } else {
-        await addFavorite(character);
-        setFavoriteIds((prev) => [...prev, character.mal_id]);
-      }
-    } catch {
-      Alert.alert('Error', 'Gagal mengubah favorit.');
-    }
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#D66A91" />
-        <Text>Memuat karakter...</Text>
-      </View>
-    );
-  }
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.menu}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push('/character-explorer/search')}
-        >
-          <Text style={styles.buttonText}>Cari Karakter</Text>
-        </TouchableOpacity>
+    <SafeAreaView style={pageStyles.container} edges={['bottom', 'left', 'right']}>
+      <ScrollView contentContainerStyle={pageStyles.content}>
+        <Text style={pageStyles.title}>Character Explorer</Text>
+        <Text style={pageStyles.subtitle}>Karakter anime terpopuler (API Jikan)</Text>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push('/character-explorer/favorites')}
-        >
-          <Text style={styles.buttonText}>Favorit ❤️</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.menu}>
+          <View style={styles.menuItem}>
+            <PageButton title="🔍 Cari Karakter" onPress={() => router.push('/character-explorer/search')} />
+          </View>
+          <View style={styles.menuItem}>
+            <PageButton
+              title="❤️ Favorit"
+              variant="outline"
+              onPress={() => router.push('/character-explorer/favorites')}
+            />
+          </View>
+        </View>
 
-      <Text style={styles.heading}>Top Karakter Anime</Text>
-
-      <FlatList
-        data={characters}
-        keyExtractor={(item) => item.mal_id.toString()}
-        renderItem={({ item }) => (
-          <CharacterCard
-            character={item}
-            isFavorite={favoriteIds.includes(item.mal_id)}
-            onPress={() =>
-              router.push(
-                `/character-explorer/character/${item.mal_id}`
-              )
-            }
-            onToggleFavorite={() => toggleFavorite(item)}
-          />
+        {loading ? (
+          <Loading message="Mengambil data karakter..." />
+        ) : error ? (
+          <ErrorMessage message={error} onRetry={loadData} />
+        ) : (
+          <>
+            <Text style={pageStyles.sectionTitle}>Top Karakter</Text>
+            {characters.map((character) => (
+              <CharacterCard
+                key={character.mal_id}
+                character={character}
+                onPress={(c) =>
+                  router.push({ pathname: '/character-explorer/character/[id]', params: { id: String(c.mal_id) } })
+                }
+              />
+            ))}
+          </>
         )}
-        ListEmptyComponent={
-          <Text style={styles.empty}>Tidak ada karakter ditemukan.</Text>
-        }
-        refreshing={loading}
-        onRefresh={loadCharacters}
-      />
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF8FA',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-  },
-  menu: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 12,
-  },
-  button: {
-    backgroundColor: '#D66A91',
-    padding: 12,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginHorizontal: 16,
-    marginVertical: 12,
-    color: '#333333',
-  },
-  empty: {
-    textAlign: 'center',
-    marginTop: 30,
-    color: '#777777',
-  },
+  menu: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  menuItem: { flex: 1 },
 });

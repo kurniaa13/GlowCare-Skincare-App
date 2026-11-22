@@ -8,6 +8,7 @@ import { PageButton } from '@/components/PageButton';
 import { StatCard } from '@/components/StatCard';
 import { getGuidePathForCategory } from '@/data/guides';
 import { pageStyles } from '@/styles';
+import { isFavorite, toggleFavorite } from '@/services/productFavoriteService';
 import { getProductById, PRODUCT_NOT_FOUND } from '@/services/productService';
 import type { SkincareProduct } from '@/types';
 import { showAddedToCartAlert } from '@/utils/cart';
@@ -18,6 +19,7 @@ export default function ProductDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [product, setProduct] = useState<SkincareProduct | null>(null);
+  const [favorite, setFavorite] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +28,11 @@ export default function ProductDetailPage() {
     setLoading(true);
     setError(null);
     getProductById(String(id))
-      .then((data) => setProduct(data))
+      .then((data) => {
+        setProduct(data);
+        return isFavorite(data.id);
+      })
+      .then((fav) => setFavorite(fav))
       .catch((e: unknown) => {
         // Jika id tidak ditemukan (mis. dibuka lewat link yang salah), kembali ke Home.
         // replace() dipakai agar halaman yang tidak valid tidak tersisa di riwayat navigasi.
@@ -42,6 +48,12 @@ export default function ProductDetailPage() {
   useEffect(() => {
     loadProduct();
   }, [loadProduct]);
+
+  const handleToggleFavorite = async () => {
+    if (!product) return;
+    const updated = await toggleFavorite(product);
+    setFavorite(updated.some((p) => p.id === product.id));
+  };
 
   const handleBack = () => {
     // canGoBack() false jika halaman ini dibuka langsung (deep link), jadi arahkan ke Home.
@@ -105,6 +117,11 @@ export default function ProductDetailPage() {
         </View>
 
         <View style={styles.actions}>
+          <PageButton
+            title={favorite ? '❤️ Hapus dari Favorit' : '🩶 Tambah ke Favorit'}
+            variant="outline"
+            onPress={handleToggleFavorite}
+          />
           <PageButton
             title="+ Beli"
             disabled={!product.isReady}

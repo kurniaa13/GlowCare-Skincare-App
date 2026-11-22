@@ -1,34 +1,14 @@
 import { Stack } from 'expo-router';
+import { stackScreenOptions } from '@/styles';
 
-export default function CharacterExplorerLayout() {
+// Codelab-1 Modul 3 (Character Explorer): nested Stack, struktur mengikuti modul.
+export default function AnimeHunterLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: '#F8E8EF',
-        },
-        headerTintColor: '#333333',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{ title: 'Top Karakter' }}
-      />
-      <Stack.Screen
-        name="search"
-        options={{ title: 'Cari Karakter' }}
-      />
-      <Stack.Screen
-        name="favorites"
-        options={{ title: 'Karakter Favorit' }}
-      />
-      <Stack.Screen
-        name="character/[id]"
-        options={{ title: 'Detail Karakter' }}
-      />
+    <Stack screenOptions={stackScreenOptions}>
+      <Stack.Screen name="index" options={{ title: 'Character Explorer' }} />
+      <Stack.Screen name="search" options={{ title: 'Search Character' }} />
+      <Stack.Screen name="favorites" options={{ title: 'Favorites' }} />
+      <Stack.Screen name="character/[id]" options={{ title: 'Character Detail' }} />
     </Stack>
   );
 }

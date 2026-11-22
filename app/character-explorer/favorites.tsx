@@ -2,8 +2,8 @@ import React, { useCallback, useState } from 'react';
 import { ScrollView, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
-import CharacterCard from '@/components/CharacterCard';
-import { getFavorites, removeFavorite } from '@/services/favoriteService';
+import { CharacterCard } from '@/components/CharacterCard';
+import { getFavorites, toggleFavorite } from '@/services/favoriteService';
 import type { Character } from '@/types/character';
 import { Loading } from '@/components/Loading';
 import { pageStyles } from '@/styles';
@@ -23,10 +23,8 @@ export default function FavoriteCharactersPage() {
   );
 
   const handleRemove = async (character: Character) => {
-    await removeFavorite(character.mal_id);
-    setFavorites((currentFavorites) =>
-      currentFavorites.filter((item) => item.mal_id !== character.mal_id)
-    );
+    const updated = await toggleFavorite(character);
+    setFavorites(updated);
   };
 
   return (
@@ -47,9 +45,9 @@ export default function FavoriteCharactersPage() {
                 key={character.mal_id}
                 character={character}
                 isFavorite
-                onToggleFavorite={() => handleRemove(character)}
-                onPress={() =>
-                  router.push({ pathname: '/character-explorer/character/[id]', params: { id: String(character.mal_id) } })
+                onToggleFavorite={handleRemove}
+                onPress={(c) =>
+                  router.push({ pathname: '/character-explorer/character/[id]', params: { id: String(c.mal_id) } })
                 }
               />
             ))}
