@@ -1,48 +1,35 @@
-import type { Character } from '../types/character';
-import {
-  fetchTopCharacters,
-  searchCharacters,
-  fetchCharacterDetail,
-} from './api';
+import type { Character } from '@/types/character';
+import { delay } from '@/utils/delay';
+import { fetchCharacterById, fetchCharactersByName, fetchTopCharacters } from './api';
 
-const delay = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
+// 1) async/await
+export async function getTopCharacters(): Promise<Character[]> {
+  const response = await fetchTopCharacters();
+  return response.data;
+}
 
-export const getTopCharacters = async (): Promise<Character[]> => {
-  await delay(500);
-
-  try {
-    const characters = await fetchTopCharacters();
-    return characters;
-  } catch (error) {
-    return Promise.reject(error);
-  }
-};
-
-export const searchCharacter = (
-  keyword: string
-): Promise<Character[]> => {
-  return new Promise((resolve, reject) => {
-    if (keyword.trim().length < 3) {
-      reject(new Error('Masukkan minimal 3 karakter untuk pencarian'));
-      return;
-    }
-
-    searchCharacters(keyword)
-      .then((characters) => resolve(characters))
+// 2) new Promise + .then() + resolve() + reject()
+export function getCharacterById(id: number): Promise<Character> {
+  return new Promise<Character>((resolve, reject) => {
+    fetchCharacterById(id)
+      .then((response) => {
+        if (response.success && response.data) {
+          resolve(response.data);
+        } else {
+          reject(new Error('Karakter tidak ditemukan.'));
+        }
+      })
       .catch((error) => reject(error));
   });
-};
+}
 
-export const getCharacterDetail = async (
-  id: number
-): Promise<Character> => {
-  await delay(300);
-
-  try {
-    const character = await fetchCharacterDetail(id);
-    return character;
-  } catch (error) {
-    return Promise.reject(error);
+// 3) Promise.reject() untuk validasi + chaining .then() + delay()
+export function searchCharacters(name: string): Promise<Character[]> {
+  const keyword = name.trim();
+  if (keyword.length < 3) {
+    return Promise.reject(new Error('Ketik minimal 3 huruf untuk mencari.'));
   }
-};
+  return delay(300) // jeda kecil agar tidak terlalu sering menembak API
+    .then(() => fetchCharactersByName(keyword))
+    .then((response) => response.data);
+}

@@ -7,9 +7,18 @@ interface ProductCardProps {
   onAddToCart: (name: string) => void;
   /** Opsional: dipanggil saat kartu ditekan (dipakai untuk membuka halaman detail). */
   onPress?: (item: SkincareProduct) => void;
+  /** Opsional (Modul 3): status favorit + handler tombol hati. */
+  isFavorite?: boolean;
+  onToggleFavorite?: (item: SkincareProduct) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart, onPress }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  item,
+  onAddToCart,
+  onPress,
+  isFavorite = false,
+  onToggleFavorite,
+}) => {
   return (
     <Pressable
       style={styles.card}
@@ -23,20 +32,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart, onP
       <View style={styles.details}>
         <View style={styles.categoryRow}>
           <Text style={styles.categoryText}>{item.category}</Text>
-          <View
-            style={[
-              styles.stockBadge,
-              { backgroundColor: item.isReady ? '#DCFCE7' : '#FEE2E2' },
-            ]}
-          >
-            <Text
+          <View style={styles.badgeRow}>
+            <View
               style={[
-                styles.stockText,
-                { color: item.isReady ? '#15803D' : '#B91C1C' },
+                styles.stockBadge,
+                { backgroundColor: item.isReady ? '#DCFCE7' : '#FEE2E2' },
               ]}
             >
-              {item.isReady ? 'Ready' : 'Habis'}
-            </Text>
+              <Text
+                style={[
+                  styles.stockText,
+                  { color: item.isReady ? '#15803D' : '#B91C1C' },
+                ]}
+              >
+                {item.isReady ? 'Ready' : 'Habis'}
+              </Text>
+            </View>
+            {onToggleFavorite ? (
+              <Pressable onPress={() => onToggleFavorite(item)} hitSlop={10}>
+                <Text style={styles.heart}>{isFavorite ? '❤️' : '🩶'}</Text>
+              </Pressable>
+            ) : null}
           </View>
         </View>
 
@@ -98,6 +114,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#9F1239',
     textTransform: 'uppercase',
+  },
+  heart: {
+    fontSize: 18,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   stockBadge: {
     paddingHorizontal: 6,

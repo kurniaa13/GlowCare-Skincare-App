@@ -1,187 +1,93 @@
-
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
+import { getCharacterById } from '@/services/characterService';
+import { isFavorite, toggleFavorite } from '@/services/favoriteService';
+import type { Character } from '@/types/character';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { Loading } from '@/components/Loading';
+import { PageButton } from '@/components/PageButton';
+import { StatCard } from '@/components/StatCard';
+import { pageStyles } from '@/styles';
 
-import type { Character } from '../../../types/character';
-import { getCharacterDetail } from '../../../services/characterService';
-import {
-  addFavorite,
-  removeFavorite,
-  isFavorite,
-} from '../../../services/favoriteService';
-
-export default function CharacterDetailScreen() {
+// Dynamic route: /character-explorer/character/17, dst. (id = mal_id dari API)
+export default function CharacterDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
-
   const [character, setCharacter] = useState<Character | null>(null);
-  const [favorite, setFavorite] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [favorite, setFavorite] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadDetail = async () => {
-      try {
-        const data = await getCharacterDetail(Number(id));
+  const loadData = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getCharacterById(Number(id))
+      .then((data) => {
         setCharacter(data);
-
-        const favoriteStatus = await isFavorite(Number(id));
-        setFavorite(favoriteStatus);
-      } catch {
-        Alert.alert('Error', 'Gagal memuat detail karakter.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDetail();
+        return isFavorite(data.mal_id);
+      })
+      .then((fav) => setFavorite(fav))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Terjadi kesalahan.'))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  const toggleFavorite = async () => {
-    if (!character) return;
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-    try {
-      if (favorite) {
-        await removeFavorite(character.mal_id);
-        setFavorite(false);
-      } else {
-        await addFavorite(character);
-        setFavorite(true);
-      }
-    } catch {
-      Alert.alert('Error', 'Gagal mengubah status favorit.');
-    }
+  const handleToggle = async () => {
+    if (!character) return;
+    const updated = await toggleFavorite(character);
+    setFavorite(updated.some((c) => c.mal_id === character.mal_id));
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#D66A91" />
-        <Text>Memuat detail karakter...</Text>
-      </View>
-    );
-  }
-
-  if (!character) {
-    return (
-      <View style={styles.center}>
-        <Text>Detail karakter tidak ditemukan.</Text>
-      </View>
-    );
-  }
-
-  const imageUrl =
-    character.images?.webp?.image_url ||
-    character.images?.jpg?.image_url;
-
   return (
-    <ScrollView style={styles.container}>
-      <Image
-        source={{ uri: imageUrl }}
-        style={styles.image}
-        resizeMode="contain"
-      />
+    <SafeAreaView style={pageStyles.container} edges={['bottom', 'left', 'right']}>
+      <ScrollView contentContainerStyle={pageStyles.content}>
+        {loading ? (
+          <Loading message="Memuat detail karakter..." />
+        ) : error || !character ? (
+          <ErrorMessage message={error ?? 'Data tidak tersedia.'} onRetry={loadData} />
+        ) : (
+          <>
+            <Image source={{ uri: character.images.jpg.image_url }} style={styles.image} />
+            <Text style={[pageStyles.title, styles.name]}>{character.name}</Text>
+            {character.name_kanji ? <Text style={pageStyles.subtitle}>{character.name_kanji}</Text> : null}
 
-      <View style={styles.content}>
-        <Text style={styles.name}>{character.name}</Text>
+            <View style={styles.statsRow}>
+              <StatCard label="Favorit" value={character.favorites.toLocaleString('id-ID')} />
+              <StatCard label="Nama Panggilan" value={character.nicknames.length} />
+              <StatCard label="MAL ID" value={character.mal_id} />
+            </View>
 
-        {character.name_kanji ? (
-          <Text style={styles.kanji}>{character.name_kanji}</Text>
-        ) : null}
+            <Text style={pageStyles.sectionTitle}>Tentang</Text>
+            <Text style={pageStyles.bodyText}>
+              {character.about ? character.about.trim() : 'Belum ada deskripsi untuk karakter ini.'}
+            </Text>
 
-        <Text style={styles.favorites}>
-          ❤️ {character.favorites} Favorites
-        </Text>
-
-        <TouchableOpacity
-          style={styles.favoriteButton}
-          onPress={toggleFavorite}
-        >
-          <Text style={styles.favoriteButtonText}>
-            {favorite ? '❤️ Hapus dari Favorit' : '🤍 Tambah ke Favorit'}
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={styles.sectionTitle}>Nickname</Text>
-        <Text style={styles.description}>
-          {character.nicknames?.length
-            ? character.nicknames.join(', ')
-            : 'Tidak ada nickname.'}
-        </Text>
-
-        <Text style={styles.sectionTitle}>Tentang Karakter</Text>
-        <Text style={styles.description}>
-          {character.about || 'Informasi karakter belum tersedia.'}
-        </Text>
-      </View>
-    </ScrollView>
+            <View style={styles.actions}>
+              <PageButton
+                title={favorite ? '❤️ Hapus dari Favorit' : '🩶 Tambah ke Favorit'}
+                onPress={handleToggle}
+              />
+            </View>
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF8FA',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-  },
   image: {
-    width: '100%',
-    height: 300,
-    backgroundColor: '#F8E8EF',
+    width: 160,
+    height: 230,
+    borderRadius: 12,
+    alignSelf: 'center',
+    backgroundColor: '#F9FAFB',
   },
-  content: {
-    padding: 18,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  kanji: {
-    fontSize: 16,
-    color: '#777777',
-    marginTop: 4,
-  },
-  favorites: {
-    fontSize: 14,
-    color: '#777777',
-    marginTop: 10,
-  },
-  favoriteButton: {
-    backgroundColor: '#D66A91',
-    padding: 13,
-    borderRadius: 10,
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  favoriteButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginTop: 22,
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: '#555555',
-    textAlign: 'justify',
-  },
+  name: { marginTop: 16 },
+  statsRow: { flexDirection: 'row', gap: 8, marginTop: 14 },
+  actions: { marginTop: 20 },
 });
